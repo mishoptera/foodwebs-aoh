@@ -1,0 +1,36 @@
+---
+title: "foodwebs-eda"
+author: "Misha Leong"
+date: "1/10/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Setup environment
+
+Load libraries and files to work with
+
+```{r loadup}
+# load libraries
+library(tidyverse)
+
+# load files
+load('data/all_inat.Rdata')
+load('data/cities.Rdata')
+
+# source files
+#source('functions/isp_functions.r')
+```
+
+## Some basic stats
+
+
+
+```{r basics, echo=FALSE}
+plot(pressure)
+```
+
+
