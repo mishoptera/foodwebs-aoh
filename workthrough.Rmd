@@ -18,8 +18,7 @@ Load libraries and files to work with
 library(tidyverse)
 
 # load files
-load('data/all_inat.Rdata')
-load('data/cities.Rdata')
+load('data/aoh.Rdata')
 
 # source files
 #source('functions/isp_functions.r')
