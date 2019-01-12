@@ -20,16 +20,43 @@ library(tidyverse)
 # load files
 load('data/aoh.Rdata')
 
-# source files
-#source('functions/isp_functions.r')
 ```
 
 ## Some basic stats
 
 
-
 ```{r basics, echo=FALSE}
-plot(pressure)
+head(aoh)
 ```
 
+```{r rooms}
+room_names <- c("basement", "bath", "bed", "common", "kitchen", "attic")
+
+# create simple ranking tables for each taxa (landcover collapsed)
+lapply(room_names, function(i){
+  assign(paste0("core_", i) , core(all_inat %>% filter (room == i), i), 
+         envir = .GlobalEnv)
+})
+
+  
+```
+
+```{r coreFunction}
+core <- function (room_data, room) {
+ 
+  room_rank = paste0(room, "_rank")
+  room_count = paste0(room, "_count")
+  
+  room_taxa <- room_data %>%
+    group_by(roomUnique) %>%
+    summarise(count = n()) %>%
+    arrange(desc(count)) %>%
+    mutate(rank = rank(desc(count), ties.method="average")) %>%
+    rename(!!city_rank := rank) %>%
+    rename(!!city_count := count)
+  
+  return(city_taxa)
+}
+
+```
 
