@@ -42,6 +42,7 @@ lapply(room_names, function(i){
 ```
 
 ```{r coreFunction}
+library(network) #https://www.jessesadler.com/post/network-analysis-with-r/
 core <- function (room_data, room) {
  
   room_rank = paste0(room, "_rank")
