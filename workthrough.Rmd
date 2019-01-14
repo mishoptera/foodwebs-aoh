@@ -19,6 +19,7 @@ library(tidyverse)
 
 # load files
 load('data/aoh.Rdata')
+load('data/core.Rdata')
 
 ```
 
@@ -27,6 +28,8 @@ load('data/aoh.Rdata')
 
 ```{r basics, echo=FALSE}
 head(aoh)
+head(core)
+aoh_core <- semi_join(aoh, core, by = "familyLong")
 ```
 
 ```{r rooms}
@@ -97,3 +100,5 @@ effect.sizes(cooccur.finches,matrix=TRUE)
 
 ```
  
+
+
