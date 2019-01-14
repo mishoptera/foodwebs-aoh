@@ -60,4 +60,40 @@ core <- function (room_data, room) {
 }
 
 ```
+ Compare to cooccur
+```{r}
+#now run coccurrence!
+library(cooccur)
+setwd("~/Dropbox/AoH/dataMain/Useful")
+aoh<-read.csv("cooccurPAgreaterThan10.csv")
+cooccur.aoh<-cooccur(mat=aoh, type="site_spp", spp_names=TRUE, thresh=TRUE)
+summary(cooccur.aoh)
+plot(cooccur.aoh)
+es<-effect.sizes(cooccur.aoh, standardized=TRUE,matrix=FALSE)
+scuti<-pair(cooccur.aoh, "Scutigeromorpha..house.centipedes._Scutigeridae..house.centipedes.", all=FALSE)
+scutiALL<-pair(cooccur.aoh, "Scutigeromorpha..house.centipedes._Scutigeridae..house.centipedes.", all=TRUE)
+pair.profile(cooccur.aoh)
+co<-pair.attributes(cooccur.aoh)
+print(cooccur.aoh)
+prob.table(cooccur.aoh)
 
+
+zygen<-pair(cooccur.aoh, "Zygentoma..silverfish._Lepismatidae..silverfish.", all=FALSE)
+zygenALL<-pair(cooccur.aoh, "Zygentoma..silverfish._Lepismatidae..silverfish.", all=TRUE)
+
+write.csv(es, "es.csv")
+write.csv(scuti, "scuti.csv")
+write.csv(scutiALL, "scutiALL.csv")
+write.csv(zygen, "zygen.csv")
+write.csv(zygenALL, "zygenALL.csv")
+
+data(finches)
+cooccur.finches <- cooccur(mat=finches,
+                           type="spp_site",
+                           thresh=FALSE,
+                           spp_names=TRUE)
+effect.sizes(cooccur.finches,matrix=TRUE)
+
+
+```
+ 
