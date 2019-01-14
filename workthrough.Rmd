@@ -16,6 +16,7 @@ Load libraries and files to work with
 ```{r loadup}
 # load libraries
 library(tidyverse)
+library(cooccur)
 
 # load files
 load('data/aoh.Rdata')
@@ -25,29 +26,41 @@ load('data/core.Rdata')
 
 ## Some basic stats
 
-
 ```{r basics, echo=FALSE}
 head(aoh)
 head(core)
 aoh_core <- semi_join(aoh, core, by = "familyLong")
 ```
 
-```{r rooms}
-room_names <- c("basement", "bath", "bed", "common", "kitchen", "attic")
 
-# create simple ranking tables for each taxa (landcover collapsed)
-lapply(room_names, function(i){
-  assign(paste0("core_", i) , core(all_inat %>% filter (room == i), i), 
-         envir = .GlobalEnv)
-})
-
-  
-```
-
+## Function to look for cooccurrence
 ```{r coreFunction}
-library(network) #https://www.jessesadler.com/post/network-analysis-with-r/
-core <- function (room_data, room) {
+
+i <- "kitchen"
+room_data <- aoh_core %>% filter (roomType == i)
+coo <- function (room_data, room) {
  
+  #build a presence/absence matrix
+  core_matrix <- room_data %>%
+    group_by(roomUnique, familyLong) %>%
+    summarise(obs = n()) %>%
+    spread(familyLong, obs, fill = 0) %>%
+    column_to_rownames(var = "roomUnique")
+  
+  rownames(core_matrix) <-  core_matrix[,1]
+  core_matrix <- core_matrix[-1, ]
+  core_matrix <- as.tibble(core_matrix)
+  
+  #run coccur program
+  cooccur.aoh<-cooccur(mat=core_matrix, type="spp_site", spp_names=TRUE, thresh=TRUE)
+  summary(cooccur.aoh)
+  plot(cooccur.aoh)
+  es<-effect.sizes(cooccur.aoh, standardized=TRUE,matrix=FALSE)
+  #output the main relationships for each room
+  
+  
+  
+  
   room_rank = paste0(room, "_rank")
   room_count = paste0(room, "_count")
   
@@ -101,4 +114,14 @@ effect.sizes(cooccur.finches,matrix=TRUE)
 ```
  
 
+```{r rooms}
+room_names <- c("basement", "bath", "bed", "common", "kitchen", "attic")
 
+# create simple ranking tables for each taxa (landcover collapsed)
+lapply(room_names, function(i){
+  assign(paste0("core_", i) , coo(aoh_core %>% filter (room == i), i), 
+         envir = .GlobalEnv)
+})
+
+  
+```
