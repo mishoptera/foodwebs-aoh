@@ -19,8 +19,8 @@ library(tidyverse)
 library(cooccur)
 
 # load files
-load('data/aoh.Rdata')
-load('data/core.Rdata')
+load('data/aoh.Rdata') # large 7roomsFamilies dataset from Bertone PeerJ paper
+load('data/core.Rdata') # list of 47 core species from Leong Sci Reports paper
 
 ```
 
@@ -36,27 +36,40 @@ aoh_core <- semi_join(aoh, core, by = "familyLong")
 ## Function to look for cooccurrence
 ```{r coreFunction}
 
-i <- "kitchen"
+i <- "basement"
 room_data <- aoh_core %>% filter (roomType == i)
+
 coo <- function (room_data, room) {
- 
-  #build a presence/absence matrix
+  # build a presence/absence matrix
   core_matrix <- room_data %>%
     group_by(roomUnique, familyLong) %>%
     summarise(obs = n()) %>%
     spread(familyLong, obs, fill = 0) %>%
-    column_to_rownames(var = "roomUnique")
-  
+    as.data.frame() 
   rownames(core_matrix) <-  core_matrix[,1]
-  core_matrix <- core_matrix[-1, ]
-  core_matrix <- as.tibble(core_matrix)
+  core_matrix <- core_matrix[, -1]
+  core_matrix <- t(core_matrix) # transpose data frame
   
-  #run coccur program
-  cooccur.aoh<-cooccur(mat=core_matrix, type="spp_site", spp_names=TRUE, thresh=TRUE)
-  summary(cooccur.aoh)
-  plot(cooccur.aoh)
-  es<-effect.sizes(cooccur.aoh, standardized=TRUE,matrix=FALSE)
-  #output the main relationships for each room
+  # run cooccur program
+  cooccur_room <- cooccur(mat = core_matrix, type = "spp_site", 
+                          spp_names = TRUE, thresh = TRUE)
+  summary(cooccur_room)
+  plot(cooccur_room)
+  
+  # output the main relationships for each room
+  # results table is filtered for significant pairwise observations where 
+  # species are found occurring together greater than expected. For further 
+  # explanation of results table see:
+  # https://www.jstatsoft.org/article/view/v069c02/v69c02.pdf
+  pos_pairs <- as.tibble(cooccur_room$results) %>% 
+    arrange(p_gt) %>%
+    filter(p_gt < 0.05)
+  pos_pairs
+  
+  neg_pairs <- as.tibble(cooccur_room$results) %>% 
+    arrange(p_lt) %>%
+    filter(p_t < 0.05)
+  neg_pairs
   
   
   
@@ -110,6 +123,13 @@ cooccur.finches <- cooccur(mat=finches,
                            spp_names=TRUE)
 effect.sizes(cooccur.finches,matrix=TRUE)
 
+
+
+
+for(i in 1:10) {
+  if(i %% 2 == 0)
+    print(paste(i, "is even"))
+}
 
 ```
  
