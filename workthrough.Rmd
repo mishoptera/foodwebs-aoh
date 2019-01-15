@@ -33,13 +33,13 @@ aoh_core <- semi_join(aoh, core, by = "familyLong")
 ```
 
 
-## Function to look for cooccurrence
+## Function to call cooccurrence
 ```{r coreFunction}
 
 i <- "basement"
 room_data <- aoh_core %>% filter (roomType == i)
 
-coo <- function (room_data, room) {
+run_cooccur <- function (room_data, room) {
   # build a presence/absence matrix
   core_matrix <- room_data %>%
     group_by(roomUnique, familyLong) %>%
@@ -53,10 +53,14 @@ coo <- function (room_data, room) {
   # run cooccur program
   cooccur_room <- cooccur(mat = core_matrix, type = "spp_site", 
                           spp_names = TRUE, thresh = TRUE)
-  summary(cooccur_room)
-  plot(cooccur_room)
   
-  # output the main relationships for each room
+  return(cooccur_room)
+}
+```
+
+
+```{r pos}
+ # output the main relationships for each room
   # results table is filtered for significant pairwise observations where 
   # species are found occurring together greater than expected. For further 
   # explanation of results table see:
@@ -66,29 +70,45 @@ coo <- function (room_data, room) {
     filter(p_gt < 0.05)
   pos_pairs
   
+
+  
+```
+
+```{r neg}
   neg_pairs <- as.tibble(cooccur_room$results) %>% 
     arrange(p_lt) %>%
-    filter(p_t < 0.05)
+    filter(p_lt < 0.05)
   neg_pairs
-  
-  
-  
-  
-  room_rank = paste0(room, "_rank")
-  room_count = paste0(room, "_count")
-  
-  room_taxa <- room_data %>%
-    group_by(roomUnique) %>%
-    summarise(count = n()) %>%
-    arrange(desc(count)) %>%
-    mutate(rank = rank(desc(count), ties.method="average")) %>%
-    rename(!!city_rank := rank) %>%
-    rename(!!city_count := count)
-  
-  return(city_taxa)
-}
-
 ```
+
+
+```{r}
+# calling the above fuction
+room_names <- c("basement", "bath", "bed", "common", "kitchen", "attic")
+
+# create simple ranking tables for each taxa (landcover collapsed)
+lapply(room_names, function(i){
+  room_results <- assign(paste0("cooccur_", i), run_cooccur(aoh_core %>% filter (roomType == i), i), 
+         envir = .GlobalEnv)
+  summary(paste0("cooccur_", i))
+  plot(paste0("cooccur_", i))
+  assign(paste0("posPairs_", i) , pos(room_results), 
+         envir = .GlobalEnv)
+  assign(paste0("negPairs_", i) , neg(room_results), 
+         envir = .GlobalEnv)
+
+})
+
+summary(cooccur_room)
+  plot(cooccur_room)
+  
+ 
+  
+  
+  
+```
+
+
  Compare to cooccur
 ```{r}
 #now run coccurrence!
@@ -135,13 +155,7 @@ for(i in 1:10) {
  
 
 ```{r rooms}
-room_names <- c("basement", "bath", "bed", "common", "kitchen", "attic")
 
-# create simple ranking tables for each taxa (landcover collapsed)
-lapply(room_names, function(i){
-  assign(paste0("core_", i) , coo(aoh_core %>% filter (room == i), i), 
-         envir = .GlobalEnv)
-})
 
   
 ```
