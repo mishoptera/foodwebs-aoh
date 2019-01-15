@@ -35,10 +35,6 @@ aoh_core <- semi_join(aoh, core, by = "familyLong")
 
 ## Function to call cooccurrence
 ```{r coreFunction}
-
-i <- "basement"
-room_data <- aoh_core %>% filter (roomType == i)
-
 run_cooccur <- function (room_data, room) {
   # build a presence/absence matrix
   core_matrix <- room_data %>%
@@ -65,20 +61,26 @@ run_cooccur <- function (room_data, room) {
   # species are found occurring together greater than expected. For further 
   # explanation of results table see:
   # https://www.jstatsoft.org/article/view/v069c02/v69c02.pdf
+pos <- function (cooccur_room) { 
   pos_pairs <- as.tibble(cooccur_room$results) %>% 
     arrange(p_gt) %>%
-    filter(p_gt < 0.05)
-  pos_pairs
-  
-
+    filter(p_gt < 0.05) %>%
+    mutate(room = i)%>%
+    select (room, sp1_name, sp2_name, everything())
+  return (pos_pairs)
+}
   
 ```
 
 ```{r neg}
+neg <- function (cooccur_room, i) { 
   neg_pairs <- as.tibble(cooccur_room$results) %>% 
     arrange(p_lt) %>%
-    filter(p_lt < 0.05)
-  neg_pairs
+    filter(p_lt < 0.05) %>%
+    mutate(room = i) %>%
+    select (room, sp1_name, sp2_name, everything())
+  return (neg_pairs)
+}
 ```
 
 
@@ -90,18 +92,21 @@ room_names <- c("basement", "bath", "bed", "common", "kitchen", "attic")
 lapply(room_names, function(i){
   room_results <- assign(paste0("cooccur_", i), run_cooccur(aoh_core %>% filter (roomType == i), i), 
          envir = .GlobalEnv)
-  summary(paste0("cooccur_", i))
-  plot(paste0("cooccur_", i))
-  assign(paste0("posPairs_", i) , pos(room_results), 
+  summary(room_results)
+  plot(room_results)
+  assign(paste0("posPairs_", i) , pos(room_results, i), 
          envir = .GlobalEnv)
-  assign(paste0("negPairs_", i) , neg(room_results), 
+  assign(paste0("negPairs_", i) , neg(room_results, i), 
          envir = .GlobalEnv)
-
 })
 
-summary(cooccur_room)
-  plot(cooccur_room)
-  
+pos_rooms <- posPairs_basement %>%
+  bind_rows(posPairs_bath, posPairs_bed, posPairs_common, posPairs_kitchen, 
+            posPairs_attic)
+
+neg_rooms <- negPairs_basement %>%
+  bind_rows(negPairs_bath, negPairs_bed, negPairs_common, negPairs_kitchen, 
+            negPairs_attic)
  
   
   
