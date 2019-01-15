@@ -58,7 +58,7 @@ neg <- function (cooccur_room, i) {
 }
 
 # *************************************************************
-# Call functions for each room and save
+# RUNNING EVERYTHING ALL TOGETHER
 # *************************************************************
 # calling the above fuction
 room_names <- c("basement", "bath", "bed", "common", "kitchen", "attic")
