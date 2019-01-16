@@ -77,7 +77,7 @@ lapply(room_names, function(i){
 pos_rooms <- posPairs_basement %>%
   bind_rows(posPairs_bath, posPairs_bed, posPairs_common, posPairs_kitchen, 
             posPairs_attic)
-write.csv(neg_rooms, "pos_rooms.csv")
+write.csv(pos_rooms, "pos_rooms.csv")
 
 neg_rooms <- negPairs_basement %>%
   bind_rows(negPairs_bath, negPairs_bed, negPairs_common, negPairs_kitchen, 
