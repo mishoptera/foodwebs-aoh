@@ -1,1 +1,2 @@
-# foodwebs-aoh
+# By room type cooccurence of core aoh arthropod families
+Using the big North Carolina Arthropods of our Homes dataset (7roomsFamilies.csv) included in the supplementary materials of [Bertone et al 2016](https://peerj.com/articles/1582/) and the list of the 47 arthropod families that were determined to be part of the core indoor community in [Leong et al 2017](https://www.nature.com/articles/s41598-017-15584-2), I ran a cooccurrence analysis using the [cooccur package](https://www.jstatsoft.org/article/view/v069c02/v69c02.pdf).
