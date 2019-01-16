@@ -61,7 +61,7 @@ run_cooccur <- function (room_data, room) {
   # species are found occurring together greater than expected. For further 
   # explanation of results table see:
   # https://www.jstatsoft.org/article/view/v069c02/v69c02.pdf
-pos <- function (cooccur_room) { 
+pos <- function (cooccur_room, i) { 
   pos_pairs <- as.tibble(cooccur_room$results) %>% 
     arrange(p_gt) %>%
     filter(p_gt < 0.05) %>%
@@ -90,8 +90,7 @@ room_names <- c("basement", "bath", "bed", "common", "kitchen", "attic")
 
 # create simple ranking tables for each taxa (landcover collapsed)
 lapply(room_names, function(i){
-  room_results <- assign(paste0("cooccur_", i), run_cooccur(aoh_core %>% filter (roomType == i), i), 
-         envir = .GlobalEnv)
+  room_results <- run_cooccur(aoh_core %>% filter (roomType == i), i)
   summary(room_results)
   plot(room_results)
   assign(paste0("posPairs_", i) , pos(room_results, i), 
@@ -103,64 +102,13 @@ lapply(room_names, function(i){
 pos_rooms <- posPairs_basement %>%
   bind_rows(posPairs_bath, posPairs_bed, posPairs_common, posPairs_kitchen, 
             posPairs_attic)
+write.csv(pos_rooms, "pos_rooms.csv")
 
 neg_rooms <- negPairs_basement %>%
   bind_rows(negPairs_bath, negPairs_bed, negPairs_common, negPairs_kitchen, 
             negPairs_attic)
+write.csv(neg_rooms, "neg_rooms.csv")
+```
+
+
  
-  
-  
-  
-```
-
-
- Compare to cooccur
-```{r}
-#now run coccurrence!
-library(cooccur)
-setwd("~/Dropbox/AoH/dataMain/Useful")
-aoh<-read.csv("cooccurPAgreaterThan10.csv")
-cooccur.aoh<-cooccur(mat=aoh, type="site_spp", spp_names=TRUE, thresh=TRUE)
-summary(cooccur.aoh)
-plot(cooccur.aoh)
-es<-effect.sizes(cooccur.aoh, standardized=TRUE,matrix=FALSE)
-scuti<-pair(cooccur.aoh, "Scutigeromorpha..house.centipedes._Scutigeridae..house.centipedes.", all=FALSE)
-scutiALL<-pair(cooccur.aoh, "Scutigeromorpha..house.centipedes._Scutigeridae..house.centipedes.", all=TRUE)
-pair.profile(cooccur.aoh)
-co<-pair.attributes(cooccur.aoh)
-print(cooccur.aoh)
-prob.table(cooccur.aoh)
-
-
-zygen<-pair(cooccur.aoh, "Zygentoma..silverfish._Lepismatidae..silverfish.", all=FALSE)
-zygenALL<-pair(cooccur.aoh, "Zygentoma..silverfish._Lepismatidae..silverfish.", all=TRUE)
-
-write.csv(es, "es.csv")
-write.csv(scuti, "scuti.csv")
-write.csv(scutiALL, "scutiALL.csv")
-write.csv(zygen, "zygen.csv")
-write.csv(zygenALL, "zygenALL.csv")
-
-data(finches)
-cooccur.finches <- cooccur(mat=finches,
-                           type="spp_site",
-                           thresh=FALSE,
-                           spp_names=TRUE)
-effect.sizes(cooccur.finches,matrix=TRUE)
-
-
-
-
-for(i in 1:10) {
-  if(i %% 2 == 0)
-    print(paste(i, "is even"))
-}
-
-```
- 
-
-```{r rooms}
-
-
-  
-```
